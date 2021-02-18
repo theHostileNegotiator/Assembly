@@ -62,8 +62,19 @@ namespace Blamite.Blam
 			{
 				Engine = EngineType.SecondGeneration;
 
+				// turns out H2X doesnt use the meta offset mask
+				// but neither do vista campaign maps
+				// thankfully vista sets some U32 to 0xFFFFFFFF
+				reader.SeekTo(0x20);
+				uint metaOffsetMask = reader.ReadUInt32();
+				uint unkNull = reader.ReadUInt32();
 				// Read second-generation build string
-				reader.SeekTo(0x12C);
+				// are we loading an xbox cache?
+				if (metaOffsetMask == 0 && unkNull != 0xFFFFFFFF)
+					reader.SeekTo(0x120);
+				else  // probably a vista cache
+					reader.SeekTo(0x12C);
+
 				BuildString = reader.ReadAscii();
 			}
 			else if (Version == SecondGenMCCVersion)

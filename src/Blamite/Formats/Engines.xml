@@ -111,8 +111,23 @@
             <poking type="poking" path="Formats/Halo1/H1AMCC_Poking.xml" />
         </databases>
     </engine>
-
+	
 	<!-- Halo 2 Builds -->
+    <engine name="Halo 2 Xbox" version="02.09.27.09809">
+        <shortName>H2Xbox</shortName>
+        <plugins>Halo2</plugins>
+        <engineInfo>
+            <headerSize>0x800</headerSize>
+            <!-- TODO: this might not be accurate -->
+            <segmentAlignment>0x4</segmentAlignment>
+        </engineInfo>
+        <databases>
+            <layouts type="layouts" path="Formats/Halo2Xbox/Layouts" />
+            <groupNames type="groupNames" path="Formats/Halo2Vista/H2V_GroupNames.xml" />
+            <localeSymbols type="localeSymbols" path="Formats/Halo2Vista/H2V_LocaleSymbols.xml" />
+        </databases>
+    </engine>
+	
 	<engine name="Halo 2 Vista" version="11081.07.04.30.0934.main">
 		<shortName>H2Vista</shortName>
 		<plugins>Halo2</plugins>

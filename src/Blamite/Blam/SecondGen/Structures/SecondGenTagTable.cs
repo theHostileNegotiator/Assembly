@@ -16,6 +16,8 @@ namespace Blamite.Blam.SecondGen.Structures
 		private readonly MetaAllocator _allocator;
 		private readonly EngineDescription _buildInfo;
 		private readonly FileSegmentGroup _metaArea;
+		
+		private readonly StructureValueCollection _values;
 
 		private List<ITagGroup> _groups;
 		private Dictionary<int, ITagGroup> _groupsById;
@@ -28,11 +30,12 @@ namespace Blamite.Blam.SecondGen.Structures
 			_groupsById = new Dictionary<int, ITagGroup>();
 		}
 
-		public SecondGenTagTable(IReader reader, FileSegmentGroup metaArea, MetaAllocator allocator, EngineDescription buildInfo)
+		public SecondGenTagTable(IReader reader, FileSegmentGroup metaArea, MetaAllocator allocator, EngineDescription buildInfo, StructureValueCollection Values)
 		{
 			_metaArea = metaArea;
 			_allocator = allocator;
 			_buildInfo = buildInfo;
+			_values = Values;
 
 			Load(reader);
 		}
@@ -146,14 +149,36 @@ namespace Blamite.Blam.SecondGen.Structures
 
 			// Groups
 			var numGroups = (int) headerValues.GetInteger("number of tag groups");
-			var groupTableOffset = (uint) (_metaArea.Offset + (uint)headerValues.GetInteger("tag group table offset"));
+			
+			//var groupTableOffset = (uint) (_metaArea.Offset + (uint)headerValues.GetInteger("tag group table offset"));
+			uint groupTableOffset;
+			if (_buildInfo.Version == "02.09.27.09809")
+			{
+				groupTableOffset = (uint) (_metaArea.Offset + (uint)headerValues.GetInteger("tag group table offset") - (uint)_values.GetInteger("meta header mask"));
+			}
+			else
+			{
+				groupTableOffset = (uint) (_metaArea.Offset + (uint)headerValues.GetInteger("tag group table offset"));
+			}
+			
 			// Offset is relative to the header
 			_groups = LoadGroups(reader, groupTableOffset, numGroups, _buildInfo);
 			_groupsById = BuildGroupLookup(_groups);
 
 			// Tags
 			var numTags = (int) headerValues.GetInteger("number of tags");
-			var tagTableOffset = (uint) (_metaArea.Offset + (uint)headerValues.GetInteger("tag table offset"));
+			
+			// var tagTableOffset = (uint) (_metaArea.Offset + (uint)headerValues.GetInteger("tag table offset"));
+			uint tagTableOffset;
+			if (_buildInfo.Version == "02.09.27.09809")
+			{
+				tagTableOffset = (uint) (_metaArea.Offset + (uint)headerValues.GetInteger("tag table offset") - (uint)_values.GetInteger("meta header mask"));
+			}
+			else
+			{
+				tagTableOffset = (uint) (_metaArea.Offset + (uint)headerValues.GetInteger("tag table offset"));
+			}
+			
 			// Offset is relative to the header
 			_tags = LoadTags(reader, tagTableOffset, numTags, _buildInfo, _metaArea);
 		}
